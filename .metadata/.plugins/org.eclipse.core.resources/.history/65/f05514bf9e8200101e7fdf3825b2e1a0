@@ -1,0 +1,24 @@
+package com.example.loginformauth.controller;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api")
+public class AuthController {
+
+    @GetMapping("/me")
+    public Object currentUser(@AuthenticationPrincipal User user) {
+        if (user == null) return "Not authenticated";
+        return user.getUsername();
+    }
+
+    @GetMapping("/admin/dashboard")
+    public Object adminDashboard(@AuthenticationPrincipal User user) {
+        if (user == null || !user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            return "Forbidden";
+        }
+        return "Welcome Admin: " + user.getUsername();
+    }
+}

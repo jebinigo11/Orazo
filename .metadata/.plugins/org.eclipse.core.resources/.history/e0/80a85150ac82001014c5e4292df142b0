@@ -1,0 +1,27 @@
+package com.example.loginformauth.admin;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class AppAdminService {
+
+    @Autowired
+    private AppAdminRepository adminRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public AppAdmin saveAdmin(AppAdmin admin) {
+        // Encode password before saving
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+        return adminRepository.save(admin);
+    }
+
+    public Optional<AppAdmin> findByName(String name) {
+        return adminRepository.findByName(name);
+    }
+}

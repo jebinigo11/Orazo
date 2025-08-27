@@ -1,0 +1,48 @@
+package com.example.loginformauth;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.example.loginformauth.user.AppUser;
+import com.example.loginformauth.user.AppUserService;
+
+@SpringBootApplication
+public class Application {
+
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class, args);
+	}
+	@Bean
+	CommandLineRunner initUsers(AppUserService userService) {
+	    return args -> {
+	        if (userService.findByCustomerId("CUST001").isEmpty()) {
+	            AppUser u1 = new AppUser();
+	            u1.setCustomerId("CUST001");
+	            u1.setName("Customer One");
+	            userService.saveUser(u1, "password1");
+	        }
+
+	        if (userService.findByCustomerId("CUST002").isEmpty()) {
+	            AppUser u2 = new AppUser();
+	            u2.setCustomerId("CUST002");
+	            u2.setName("Customer Two");
+	            userService.saveUser(u2, "password2");
+	        }
+
+	        if (userService.findByCustomerId("CUST003").isEmpty()) {
+	            AppUser u3 = new AppUser();
+	            u3.setCustomerId("CUST003");
+	            u3.setName("Customer Three");
+	            userService.saveUser(u3, "password3");
+	        }
+	        if (userService.findByCustomerId("CUST004").isEmpty()) {
+	            AppUser u3 = new AppUser();
+	            u3.setCustomerId("CUST004");
+	            u3.setName("JEBII");
+	            userService.saveUser(u3, "password4");
+	        }
+	    };
+	}}

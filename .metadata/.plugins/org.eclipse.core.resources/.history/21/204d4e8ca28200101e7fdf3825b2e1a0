@@ -1,0 +1,19 @@
+	package com.example.loginformauth;
+	
+	import org.springframework.boot.CommandLineRunner;
+	import org.springframework.context.annotation.Bean;
+	import org.springframework.context.annotation.Configuration;
+	import org.springframework.security.crypto.password.PasswordEncoder;
+	
+	@Configuration
+	public class PasswordTestConfig {
+	
+	    @Bean
+	    CommandLineRunner testPassword(PasswordEncoder encoder) {
+	        return args -> {
+	            String raw = "password1";
+	            String hash = "$2a$10$WcE17p6X6XnY5oRnnG6E3O3tyf1g1gIQ0nqSCXan5lG3VExuK3dH.";
+	            System.out.println("Matches? " + encoder.matches(raw, hash));
+	        };
+	    }
+	}

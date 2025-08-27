@@ -1,0 +1,24 @@
+package com.example.loginformauth.user;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+public class DataSeeder {
+
+  @Bean
+  CommandLineRunner seed(AppUserRepository repo, PasswordEncoder pe) {
+    return args -> {
+      if (!repo.existsByCustomerId("CUST001")) {
+        AppUser u = new AppUser();
+        u.setCustomerId("CUST001");
+        u.setName("Demo Customer");
+        u.setPasswordHash(pe.encode("password")); // raw: password
+        u.setEnabled(true);
+        repo.save(u);
+      }
+    };
+  }
+}

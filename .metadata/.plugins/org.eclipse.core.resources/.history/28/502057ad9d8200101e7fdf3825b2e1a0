@@ -1,0 +1,88 @@
+package com.example.loginformauth.config;
+
+import com.example.loginformauth.security.CustomAuthSuccessHandler;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfig {
+
+    private final UserDetailsService uds; // DB user service
+
+    public SecurityConfig(UserDetailsService uds) {
+        this.uds = uds;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // 👉 DB-backed authentication (customers)
+    @Bean
+    public AuthenticationProvider dbAuthProvider() {
+        DaoAuthenticationProvider p = new DaoAuthenticationProvider();
+        p.setUserDetailsService(uds);
+        p.setPasswordEncoder(passwordEncoder());
+        return p;
+    }
+
+    // 👉 In-memory admin user
+    @Bean
+    public InMemoryUserDetailsManager inMemoryUserDetailsManager(PasswordEncoder encoder) {
+        return new InMemoryUserDetailsManager(
+            User.withUsername("adminusername")
+                .password(encoder.encode("admin123"))
+                .roles("ADMIN")
+                .build()
+        );
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
+        return cfg.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login", "/css/**").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN") // 🔒 only admin
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .usernameParameter("username")
+                .passwordParameter("password")
+                .successHandler(new CustomAuthSuccessHandler())
+                .failureUrl("/login?error")
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
+            );
+
+        // ✅ Register BOTH authentication sources
+        http.authenticationProvider(dbAuthProvider());
+        http.authenticationProvider(new DaoAuthenticationProvider() {{
+            setUserDetailsService(inMemoryUserDetailsManager(passwordEncoder()));
+            setPasswordEncoder(passwordEncoder());
+        }});
+
+        return http.build();
+    }
+}

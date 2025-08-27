@@ -1,0 +1,84 @@
+package com.example.loginformauth.controller;
+
+import com.example.loginformauth.admin.Admin;
+import com.example.loginformauth.admin.AdminService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.*;
+
+@CrossOrigin(origins = "http://localhost:5173")
+@RestController
+@RequestMapping("/api/admin")
+public class AdminAuthController {
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private AdminService adminService;
+
+    // ------------------------
+    // 1️⃣ Admin Login Endpoint
+    // ------------------------
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+        try {
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(req.name, req.password)
+            );
+
+            // Fetch the full admin from DB
+            Admin admin = adminService.findByName(req.name)
+                    .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+            // Return friendly response
+            return ResponseEntity.ok(new LoginResponse("Valid admin: " + admin.getName()));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+    }
+
+    // ------------------------
+    // 2️⃣ Get Current Admin
+    // ------------------------
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentAdmin(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            return ResponseEntity.status(401).body("Not authenticated");
+        }
+        return ResponseEntity.ok(user.getUsername());
+    }
+
+    // ------------------------
+    // 3️⃣ Admin Dashboard
+    // ------------------------
+    @GetMapping("/dashboard")
+    public ResponseEntity<?> adminDashboard(@AuthenticationPrincipal User user) {
+        if (user == null || !user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            return ResponseEntity.status(403).body("Forbidden");
+        }
+        return ResponseEntity.ok("Welcome Admin: " + user.getUsername());
+    }
+
+    // ------------------------
+    // DTO Classes
+    // ------------------------
+    public static class LoginRequest {
+        public String name;
+        public String password;
+    }
+
+    public static class LoginResponse {
+        public String message;
+        public LoginResponse(String message) {
+            this.message = message;
+        }
+    }
+
+}

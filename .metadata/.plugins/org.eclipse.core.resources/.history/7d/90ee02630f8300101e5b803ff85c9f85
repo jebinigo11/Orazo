@@ -1,0 +1,85 @@
+package com.example.loginformauth.controller;
+
+import com.example.loginformauth.user.AppUser;
+import com.example.loginformauth.user.AppUserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.*;
+
+@CrossOrigin(origins = "http://localhost:5173")
+@RestController
+@RequestMapping("/api")
+public class AuthController {
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private AppUserService userService;
+
+    // ------------------------
+    // 1️⃣ Login Endpoint
+    // ------------------------
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+        try {
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(req.username, req.password)
+            );
+
+            // Fetch the full user from DB
+            AppUser appUser = userService.findByCustomerId(req.username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Return friendly response
+            return ResponseEntity.ok(new LoginResponse("Valid customer: " + appUser.getName()));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+    }
+
+    // Update DTO
+    public static class LoginResponse {
+        public String message;
+        public LoginResponse(String message) {
+            this.message = message;
+        }
+    }
+
+    // ------------------------
+    // 2️⃣ Get Current User
+    // ------------------------
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            return ResponseEntity.status(401).body("Not authenticated");
+        }
+        return ResponseEntity.ok(user.getUsername());
+    }
+
+    // ------------------------
+    // 3️⃣ Admin Dashboard
+    // ------------------------
+    @GetMapping("/admin/dashboard")
+    public ResponseEntity<?> adminDashboard(@AuthenticationPrincipal User user) {
+        if (user == null || !user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            return ResponseEntity.status(403).body("Forbidden");
+        }
+        return ResponseEntity.ok("Welcome Admin: " + user.getUsername());
+    }
+
+    // ------------------------
+    // DTO Classes
+    // ------------------------
+    public static class LoginRequest {
+        public String username;
+        public String password;
+    }
+
+}
