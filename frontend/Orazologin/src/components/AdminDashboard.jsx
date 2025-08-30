@@ -72,14 +72,21 @@ export default function AdminDashboard() {
               <ListItemIcon><DashboardIcon /></ListItemIcon>
               <ListItemText primary="Dashboard" />
             </ListItem>
-            <ListItem button>
-              <ListItemIcon><InfoIcon /></ListItemIcon>
-              <ListItemText primary="User Info" />
-            </ListItem>
-            <ListItem button>
-              <ListItemIcon><SupportIcon /></ListItemIcon>
-              <ListItemText primary="Support" />
-            </ListItem>
+            
+             <ListItem button onClick={() => navigate("/admin/alerts")}>
+  <ListItemIcon><InfoIcon /></ListItemIcon>
+  <ListItemText primary="Alert" />
+</ListItem>
+
+          <ListItem button onClick={() => navigate("/admin/usage")}>
+  <ListItemIcon><DashboardIcon /></ListItemIcon>
+  <ListItemText primary="Usage" />
+</ListItem>
+
+           <ListItem button onClick={() => navigate("/admin/tickets")}>
+  <ListItemIcon><SupportIcon /></ListItemIcon>
+  <ListItemText primary="Support" />
+</ListItem>
             <ListItem button onClick={handleSignOut}>
               <ListItemIcon><LogoutIcon /></ListItemIcon>
               <ListItemText primary="Sign Out" />

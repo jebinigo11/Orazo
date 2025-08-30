@@ -68,6 +68,7 @@ export default function DashboardLayout() {
             <li><Link to="/dashboard/billing" style={linkStyle}>Billing</Link></li>
             <li><Link to="/dashboard/payments" style={linkStyle}>Payments</Link></li>
             <li><Link to="/dashboard/alerts" style={linkStyle}>Alerts</Link></li>
+             <li><Link to="/dashboard/support" style={linkStyle}>Support</Link></li>
           </ul>
         </nav>
       </aside>
