@@ -1,36 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { FaUserShield, FaMoon, FaSun } from "react-icons/fa";
 import { MdOutlinePassword, MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
-import { Link, useNavigate } from "react-router-dom";   // ⬅️ useNavigate added
 
 export default function Login() {
   const [theme, setTheme] = useState("light");
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const navigate = useNavigate();   // ⬅️ create navigate hook
-
-  // Persist theme
   useEffect(() => {
     const stored = localStorage.getItem("orazo-theme");
     if (stored) setTheme(stored);
   }, []);
+
   useEffect(() => {
     localStorage.setItem("orazo-theme", theme);
   }, [theme]);
 
-  // -------------------------
-  // Login handler with backend
-  // -------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-
     try {
-      const res = await fetch("http://localhost:8082/api/login", {
+      const res = await fetch("http://localhost:8085/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: userId, password }),
@@ -38,28 +33,34 @@ export default function Login() {
 
       if (res.ok) {
         const data = await res.json();
-        console.log("Login success:", data);
-        alert(data.message);  // friendly message from backend
 
-        // store login flag/token if needed
+        // Store full profile safely in localStorage with fallbacks
         localStorage.setItem("user_logged_in", "true");
+        localStorage.setItem("user_name", data.name || "Guest");
+        localStorage.setItem("customer_code", data.customer_code || "");
+        localStorage.setItem("plan_name", data.plan_name || "");
+        localStorage.setItem("phone", data.phone || "");
+        localStorage.setItem("email", data.email || "");
+        localStorage.setItem("account_type", data.account_type || "");
 
-        // ✅ navigate to dashboard layout
-        navigate("/dashboard");
+        toast.success(data.message, {
+          onClose: () => navigate("/dashboard"),
+          autoClose: 1500,
+        });
       } else {
         const err = await res.text();
-        setError(err);
+        toast.error(err);
       }
     } catch (err) {
-      setError("Server error. Try again later.");
+      toast.error("Server error. Try again later.");
       console.error(err);
     }
   };
 
   return (
     <div className="app" data-theme={theme}>
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="shell">
-        {/* Brand / Illustration Side */}
         <aside className="brand-side">
           <div className="brand-wrap">
             <span className="signal signal--1" />
@@ -69,18 +70,16 @@ export default function Login() {
               <span className="brand-line">Orazo</span>
               <span className="brand-line">Telecom</span>
             </h1>
-            <p className="brand-tag">Admin Suite</p>
+            
           </div>
         </aside>
 
-        {/* Form Side */}
         <main className="form-side">
           <div className="top-bar">
             <button
               aria-label="Toggle theme"
               className="theme-toggle"
-              onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
-              title={theme === "light" ? "Switch to dark" : "Switch to light"}
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
             >
               {theme === "light" ? <FaMoon /> : <FaSun />}
             </button>
@@ -89,7 +88,6 @@ export default function Login() {
           <section className="form-card">
             <h2 className="welcome">Welcome back!</h2>
             <p className="subtitle">Please enter your details</p>
-
             <form onSubmit={handleSubmit} noValidate>
               <label className="input-row">
                 <span className="leading"><FaUserShield /></span>
@@ -114,26 +112,16 @@ export default function Login() {
                 <button
                   type="button"
                   className="trailing"
-                  onClick={() => setShowPw((s) => !s)}
+                  onClick={() => setShowPw(!showPw)}
                   aria-label={showPw ? "Hide password" : "Show password"}
                 >
                   {showPw ? <MdVisibilityOff /> : <MdVisibility />}
                 </button>
               </label>
 
-              {error && <p className="error">{error}</p>}
-
-              <div className="row options">
-                <label className="remember">
-                  <input type="checkbox" /> Remember me
-                </label>
-                <a href="#">Forgot password?</a>
-              </div>
-
               <button className="btn btn-primary" type="submit">Log in</button>
-
               <p className="signup">
-                <Link to="/admin/login" style={{ color: "#00d8ff", textDecoration: "underline" }}>
+                <Link to="/admin/login" style={{ color: "#030606ff", textDecoration: "underline" }}>
                   Admin Login
                 </Link>
               </p>

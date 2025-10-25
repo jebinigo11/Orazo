@@ -28,11 +28,11 @@ export const fetchRevenueSummary = async () => ({
 });
 
 export const fetchTopUsers = async () => [
-  { id: 1, name: "Alice Corp", plan: "Postpaid", data: 520, amount: 8200 },
-  { id: 2, name: "Bob LLC", plan: "Prepaid", data: 410, amount: 6400 },
-  { id: 3, name: "Cyan Inc", plan: "Postpaid", data: 395, amount: 6100 },
-  { id: 4, name: "Delta Ltd", plan: "Prepaid", data: 360, amount: 5900 },
-  { id: 5, name: "Echo PLC", plan: "Postpaid", data: 340, amount: 5750 },
+  { id: 1, name: "JEBII", plan: "PREPAID", data: 520, amount: 8200 },
+  { id: 2, name: "SAKITHYA", plan: "PREPAID", data: 410, amount: 6400 },
+  { id: 3, name: "KALIDAS", plan: "POSTPAID", data: 395, amount: 6100 },
+  { id: 4, name: "SHARON", plan: "POSTPAID", data: 360, amount: 5900 },
+  { id: 5, name: "JENII", plan: "POSTPAID", data: 340, amount: 5750 },
 ];
 
 export const fetchPlanSplit = async () => ({

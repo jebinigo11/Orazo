@@ -1,12 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import ThemeModeProvider from "./components/ThemeModeProvider";
+import ThemeModeProvider from "./components/ThemeModeProvider.jsx";
 
 // ==== USER PAGES ====
 import DashboardLayout from "./Layout/DashboardLayout.jsx";
 import Login from "./components/Login.jsx";
 import Profile from "./pages/Profile.jsx";
 import Usage from "./pages/Usage.jsx";
-import Billing from "./pages/Billing.jsx";
+import BillingForm from "./pages/BillingForm.jsx";
 import Payments from "./pages/Payments.jsx";
 import Alerts from "./pages/Alerts.jsx";
 import SupportTicket from "./pages/UserTickets.jsx";  // ✅ user support
@@ -28,12 +28,15 @@ export default function App() {
 
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Navigate to="profile" replace />} />
-            <Route path="profile" element={<Profile />} />
+           <Route path="profile" element={<Profile />} />
             <Route path="usage" element={<Usage />} />
-            <Route path="billing" element={<Billing />} />
+
             <Route path="payments" element={<Payments />} />
             <Route path="alerts" element={<Alerts />} />
-            <Route path="support" element={<SupportTicket />} /> {/* ✅ user support route */}
+            <Route path="support" element={<SupportTicket />} /> 
+           <Route path="billingform" element={<BillingForm />} />
+
+{/* ✅ user support route */}
           </Route>
 
           {/* ==== ADMIN ROUTES ==== */}
